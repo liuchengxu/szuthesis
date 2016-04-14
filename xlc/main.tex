@@ -1,0 +1,49 @@
+\documentclass[a4paper, punct,space,nospace, fancyhdr, fntef,UTF8]{ctexart}
+
+
+\usepackage{szutils}%在这里放置需要的宏包，并设置部分所需内容
+
+\begin{document}
+
+	\pagestyle{empty}%不要页眉页脚
+	%封面与诚信声明
+	\include{data/cover}
+	\include{data/statement}
+	
+	
+	\zihao{-4}
+	\tableofcontents%生成目录
+	\thispagestyle{empty}%页脚不要页码
+	%“目录”两个字的样式与section的样式一致，默认居中，故将设置section标题居左放置在生成目录后
+	\CTEXsetup[format={\Large\bfseries}]{section}  %section标题居左
+	
+	%%%%正文开始，页脚有页码
+	\cfoot{\thepage}
+	%正文
+	\zihao{5}
+	\pagenumbering{arabic}%页码使用阿拉伯数字f
+	\setcounter{page}{0}  %重新设置页码计数
+	\pagestyle{fancy}
+	
+	\include{data/cnabstract}
+	\include{data/chapter01}
+	\include{data/chapter02}
+	\include{data/chapter03}
+	\include{data/chapter04}
+	\include{data/chapter05}
+	\include{data/chapter06}
+	\include{data/chapter07}
+	
+	
+	%参考文献
+	\kaishu
+	\bibliographystyle{plain}
+	\addcontentsline{toc}{section}{参考文献} %向目录中添加条目，以章/section的名义
+	\bibliography{ref/szuthesis.bib}
+	
+	
+	%致谢与英文摘要
+	\fangsong
+	\include{data/acknowledgement}
+	\include{data/enabstract}
+\end{document}

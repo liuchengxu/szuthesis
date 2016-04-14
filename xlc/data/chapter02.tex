@@ -1,0 +1,169 @@
+\section{推荐系统概述}
+
+\subsection{主要符号表}
+
+\begin{table}[htbp]%[htbp]表格参数设置，固定位置
+	\setlength\tabcolsep{2pt}
+	\renewcommand\arraystretch{1.3}%改变行高
+	\caption{主要符号表}
+	\label{tab1}
+	\begin{center}
+		
+		\begin{tabular}{cc}
+			
+			\Xhline{1.2pt}
+			常用符号                    & 意义\\
+			\hline
+			$s$                         & user number \\
+			$t$                         & item number \\
+			$u$                         & user \\
+			$v$                         & item \\
+			$u_m$                       & the specified user $m$\\
+			$v_i$                       & the specified item $i$\\
+			$v_j$                       & the specified item $j$ \\
+			$b_i$                       & item bias \\
+			${r}_{ui}$                  & real rating of user $u$ on item $i$\\
+			$\hat{r}_{ui}$              & predicted rating of user $u$ on item $i$\\
+			$\hat{r}_{uj}$              & predicted rating of user $u$ on item $j$\\
+			$e_i$                       & entity, e.g., user $u$ or item $v$\\ 
+			$T$                         & iteration number in the algorithm\\
+			$k \in \mathbb{R}$          & number of lentent dimensions \\
+			$r\left(j\right)$           & the ranking place of the item $v_j$\\
+			$\mathcal{P}$               & (user, item) pairs in training data \\
+			$\mathcal{P}^{te}$          & (user item) pairs in test data\\ 
+			$\mathcal{U}$               & the whole user set\\
+			$\mathcal{I}$               & the whole item set \\
+			$\mathcal{I}_u^{re}$        & recommended items for user $u$\\
+			$\mathcal{I}_u^{te}$        & selected items by user $u$ in test data\\
+			$\mathcal{I}_u^{tr}$        & selected items by user $u$ in training data\\
+			$\mathcal{I}_{u_m}^+$       & the set of items selected by the user $u_m$ \\
+			$U \in \mathbb{R}^{s \times k } $             & user-specific lantent matrix \\
+			$V \in \mathbb{R}^{t \times k } $             & item-specific lantent matrix \\
+			$U_{u \cdot } \in \mathbb{R}^{1 \times k } $  & 
+			user-specific latent feature vector \\
+			$V_{v \cdot } \in \mathbb{R}^{1\times k}$     &
+			item-specific lantent feature vector\\
+			$Y^e = \left[y_1^e,y_2^e,y_3^e,\cdots\right]$ & latent representation of entities \\
+			$y_i^e \in \mathbb{R}^{1\times k}$            & 
+			the latent vector of entity $e_i$ \\
+		    $\mathcal{C} = \{c_1,c_2,\cdots,c_k\}$        & categories\\
+			$D_S := \{\left(m.i,j\right) | v_i \in \mathcal{I}_{u_m}^+ \wedge v_j \in \mathcal{I} \setminus \mathcal{I}_{u_m}^+\}$                        &  
+			the set of all pairwise preference\\
+			\Xhline{1.2pt}
+			
+		\end{tabular}
+	\end{center}
+\end{table}
+表\ref{tab1}中列举了大部分在本文中使用的符号及其意义。
+
+
+
+
+\subsection{推荐系统纵览}
+
+自从20世纪90年代中期第一篇关于协同过滤(Collaborative Filtering)的研究文章\cite{DBLP:conf/cscw/ResnickISBR94}出现以后，推荐系统就开始成为了一个重要且有趣的研究主题。协同过滤通过收集推荐系统中相似用户的偏好进行推荐，而生成近邻用户(neighbourhood formation)是协同过滤中非常重要的一个方面\cite{DBLP:journals/isci/KardanE13,DBLP:conf/icic/LeePP07}.近邻用户生成的目的是为每个用户找到一些相似的用户群或其最近邻，然后基于有着相似偏好的近邻用户推荐产品或服务\cite{DBLP:journals/eswa/ZhengL11,DBLP:journals/ecra/ChoiYKS12}。这里的近邻(neighbourhood)是指那些对于我们将要为之提供推荐建议的用户所感兴趣的物品有过相似交互行为的其他用户。在这里，我们把需要为之提供推荐的用户成为目标用户，那么通过比较目标用户与其近邻评分，就可以做出最终的推荐\cite{DBLP:journals/eswa/AcilarA09,kim2011recommender}。当缺乏用户评分数据的时候，协同过滤就会遇到所谓的稀疏性问题，这将导致推荐效果变得很差。因此，在推荐系统中预防稀疏性问题非常重要。为此一个很重要的途径便是从隐式反馈(比如用户的购买行为，上线时间，历史浏览记录)数据中提取用户的偏好信息来降低协同过滤对于用户评分数据的依赖，同时提高推荐效果\cite{DBLP:conf/icdm/HuKV08,DBLP:journals/eswa/AlbadviS09}。隐式反馈数据能够通过对于用户行为的观测提供更多的信息来降低评分数据不充分的影响\cite{rafeh2012adaptive,DBLP:journals/eswa/ZhengL11}。另一方面，协同过滤推荐技术的用户画像(user profile)通过用户对于物品的评分得以构建。为了降低协同过滤对于评分数据的依赖，用户行为(user activity)也已经成为研究调查的一个重要关注点，也就是说通过挖掘用户偏好的经验性知识来构建更加精确的用户画像(user profile)\cite{lee2010collaborative,DBLP:journals/eswa/ZhengL11,kim2011recommender,DBLP:journals/ecra/ChoiYKS12}。
+
+
+
+
+\subsection{典型推荐算法概述}
+
+推荐系统通过识别用户的需求与偏好为其推荐合适的产品或服务。目前国内外关于推荐系统的研究下已衍生了很多推荐算法，这些推荐算法通常可以分为三类：基于内容的推荐(Content-based recommendations), 协同过滤(Collaboratibe Filtering)和混合型(Hybrid approches)推荐.
+ 
+ 
+\subsubsection{基于内容的推荐系统}
+
+基于内容信息的方法\cite{gantner2010learning,rendle2012factorization,hong2013co}来学习个体的隐式表达(latent representation)并缓解冷启动(cold start)问题。比如，在FM\cite{rendle2012factorization}中各种属性信息被放到特征矩阵中，然后通过对于评分数据回归分析相关属性。
+
+基于内容的推荐系统从用户与物品的content profile之间的相似度出发进行推荐。他们从研究推荐系统中个体的内容信息角度进行分析。通常这类方法利用个体的内容信息，比如物品属性，用户文本，或照片的像素点，主要利用探索启发式(heuristics)的方法。在\cite{balabanovic1997fab,lang1995newsweeder,mooney2000content}中,他们使用诸如cosine similarity的方式来衡量相似度，然后推荐在内容上与用户过去所喜欢的相类似的物品。在\cite{pazzani1997learning}中，基于物品内容信息并由用户标注的标签:“相关(relevant)”或者是“不相关(irrelevant)”，作者学习了一个贝叶斯分类器来对没有标注的物品进行分类。 近来，也有很多社交媒体(social media)相关的推荐系统关注content-based推荐方法并对其进行了很多研究。比如，在\cite{li2009learning,liu2009tag}中通过基于可视性的内容相似度考虑它的最近邻标签, 然后来为目标图像推荐标签。\cite{mei2007videoreach}提出了一个在线视频的推荐系统，而该系统则利用了在用户与视频间点击数据的多模态的内容关联度。
+
+但是，这些基于内容的推荐方法大都具有以下局限性: 第一, 它们必须有足够的信息构建一个分类器, 并且显然会被推荐物品的特征所局限; 第二, 它们推荐的物品, 在内容上往往与用户已经有过评分行为的物品很相似, 显然这就会导致了较低的推荐多样性。
+
+
+\subsubsection{基于协同过滤的推荐系统}
+协同过滤(Collaborative Filtering)方法通过挖掘用户的评分历史来预测用户的偏好。它们并不需要内容信息(content information)，并且能够发现一些基于内容的推荐方法所不能发现的一些有趣的联系。通常来说，协同过滤基于这样一个基本的设想：相似的用户对于相似的物品有着相似的行为\cite{adomavicius2005toward,su2009survey}。这里的“相似”并不同于content-based方法中的内容相似度(content similarity), 它指的是相似的评分偏好(similar rating preference)。
+
+协同过滤方法可大致分为两类：memory-based methods, model-based methods。memory-based方法\cite{breese1998empirical,herlocker1999algorithmic,linden2003amazon,sarwar2001item}通常通过搜寻相似的用户或商品去进行推荐。而其相似度则是经由评分历史计算而得。memory-based方法也可进一步的被分为user-based和item-based两类方法。通过与当前用户有着相似偏好的其他用户进行推荐即为user-based, 通过推荐与当前用户喜欢过的物品所相似的物品即为item-based。不过，当缺乏用户评分数据的时候，协同过滤就会遇到叫做稀疏性的一个问题，这将很容易导致推荐效果变得很差。因此，在推荐系统常常需要应对稀疏性这一大难题。应对稀疏性问题一个重要的途径便是从隐式反馈(implicit feedback)(比如用户的购买行为，上线时间，历史浏览记录)数据中提取用户的偏好信息来降低协同过滤对于用户评分数据的依赖，当然这往往同时也能够提高推荐效果\cite{DBLP:conf/icdm/HuKV08,DBLP:journals/eswa/AlbadviS09}。另外, 相对于显式反馈，隐式反馈的数据更易采得也更丰富。隐式反馈能够通过对于用户行为的观测提供更多的信息来降低评分数据不充分的影响\cite{rafeh2012adaptive,DBLP:journals/eswa/ZhengL11}。这时其实也就是变成我们所谓的单类协同过滤(One-class Collaborative Filtering)问题。
+
+OCCF问题的最典型特征是仅能够观测到正向采样(positive examples), 比如用户的点击行为, 浏览行为，同时数据分类往往非常不均衡, 比如用户点击过物品可能只是占到整个物品集合的很小一部分。我们把用户未有过交互行为的物品，比如未点击过的物品，叫做negative examples. 那么如何从大量未有过交互行为的物品集合中针对negative examples进行采样与建模是很多问题的关键所在。在前人的一些工作中，有几种直观的策略来处理这个问题。其实一个最常见的做法是将所有缺失的数据视作negative examples,显然这将导致推荐结果具有偏差，因为很多缺失数据很多可能是positive examples。另一种做法是所缺失的数据是做未知的，这将导致协同过滤模型仅利用了positive examples。近来的一些研究中，一些关于OCCF的研究人员将重点放到了对于negative examples的建模上[19,34,35,44]。他们的一个基本的想法是将所缺失的数据视作是negative,但是给出了将其视作negative的一个概率权重。不过，他们当中的部分做法仅仅是通过简单地观测历史反馈的概率属性来区分negative examples。比如，[19,34],他们计算了每个用户给多少物品评过分，每个物品被多少用户评过分，由此来计算一个权重。进一步的说，他们认为如果一个用户浏览过的物品越多，那么他没有浏览过的物品便更大可能是negative类型；如果一个物品被越少的用户浏览过，那么这个物品相关缺失数据便更小可能是negative, 这种做法仍然是略显粗糙。
+
+协作型方法\cite{rendle2009bpr,yu2013recommendation,zhong2014adaptive}通过处理大量的用户与物品间的交互信息，比如隐式反馈和显式的评分(也叫作协同信息)。这些方法
+
+不同于memory-based方法，model-based方法采用机器学习与概率统计的技术从已有的用户评分去学习一个模型，再将模型应用到推荐中。其中包括有隐语义模型(latent semantic models), 图模型(graphical models),贝叶斯模型(Bayesian models), 聚类模型(clustering models).在众多的model-based方法中，低秩矩阵分解(low-rank Matrix Factorization)由于在可扩展性与精确度方面的优势已经获得了许多研究者的关注。其实分解的方法在个性化的推荐系统中很常见。他们可以被用来处理推荐系统中收集的各种信息，比如隐式反馈\cite{hu2008collaborative,rendle2009bpr},物品属性\cite{gantner2010learning,rendle2012factorization},用户画像\cite{hong2013co}和社交信息\cite{ma2011recommender}。其中矩阵分解基于用户的偏好可以被一小部分因子表示，通过从user-item rating matrix来学习user与item一个低秩隐含因子，然后利用它们去预测未被观测到的ratings。
+
+矩阵分解\cite{girase2015role}及其一些扩展方法\cite{li2010improving,gemulla2011large,zhang2014temporal}是用来处理协同信息的非常典型的分解方法, 它通过分解协同信息并试图在一个共享的隐式空间学习用户与物品的隐式表达。比如，隐式矩阵分解\cite{hu2008collaborative}通过为每个user-item pair计算一个适应性的信任权重来扩展基础的BPR处理隐式反馈。尽管通过扩展BPR能够应对隐式反馈问题，但是由于在隐式反馈数据集中普遍存在的数据倾斜(data skew)问题(正反馈数量常常不到总数的1\%), 他们很容易陷入过拟合问题。为了缓解数据倾斜与推荐系统的隐式反馈学习，Bayesian Personalized Ranking (BPR)\cite{rendle2009bpr}和它的一些扩展方法\cite{pan2013gbpr,qiu2014item,rendle2014improving}被提出，其所基于的假设为：相比于未选择的物品用户更感兴趣已经选择的物品。这样假设会产生大量的训练数据，因此对应的学习算法通常基于均匀采样用户物品对的随机梯度下降。但是不同的训练采样可能会对参数学习产生不同的影响，均匀采样策略往往会产生大量低效的训练采样并导致收敛变得缓慢。尤其是当物品数量很大和物品的流行度有着长尾分布(long distribution)\cite{feldmann1997fitting}的时候，均匀采样策略将会导致极其缓慢的收敛。因此，BPR的作者Rendle进一步研究了长尾效应并利用它提出了非均匀的物品采样器\cite{rendle2014improving}。对于给定的一个用户，他们计划挑选出那些在某一领域很流行并且尚未被该用户选择过的物品来构成训练对。理论上，这种采样方式很耗时，因为它将物品的隐式因子当做物品流行度的指示器并且需要在每轮迭代的每个区域对物品进行重新排序。为了考虑运行效率，Rendle不得不减少重新排序的时间来妥协推荐性能。另一方面，为了获得一个通用的加速BPR学习的方案，\cite{zhong2014adaptive} 尝试根据一个在两个不同未选择过的物品上的偏好差别来选取那些富含信息的训练对。但是，由于真实世界的数据集里物品数往往极其庞大,这种策略不得不在计算偏好差别上花费大量的时间。因此，\cite{rendle2014improving,zhong2014adaptive}都陷入了平衡算法效率与性能表现的两难境地。在本课题中所研究的采样策略在效率与性能两方面都表现了很好的效果，并且有潜力加速BPR的学习。
+
+传统的协同过滤对于评分预测问题往往能够取得很好的效果，比如Netflix的电影推荐。但是，它受制于一个众所周知的问题: 冷启动，当一个新的物品或用户进入系统时由于几乎无法获得任何评分记录, 在此种情况下推荐效果往往很不理想。为了缓解推荐系统中的冷启动问题，Map-BPR\cite{gantner2010learning}扩展了BPR框架，他们学习了一个将内容信息空间映射到隐式空间的一个映射关系。然后，Map——BPR利用学习到了这个映射学习那些缺乏协同信息的新个体的隐式因子。不过，Map-BPR将隐式因子的学习分割为两个不相关的部分。这会导致在隐式反馈数据集中的个体的隐式因子仅仅指示协同属性而不会显示内容属性。为了获得更可信的隐式因子，在本课题的研究方法在同一个学习过程中研究了通过协同信息与内容信息学习个体的隐式因子。
+
+\subsubsection{混合式推荐系统}
+混合方法尝试将基于内容与协同过滤的推荐方法结合起来应对它们的局限性。\cite{burke2007hybrid}通过将基于内容与协同过滤的预测结果进行线性组合设计了一个混合推荐模型。\cite{schein2002methods}提出从概率混合的角度将协同过滤与基于内容的推荐方法进行统一。近来也有很多工作都重点关注了社交媒体推荐(social media recommendation)，而他们中的大部分都采用了混合方法，在挖掘社交媒体内容的同时考虑了用户的历史行为来获得更高的推荐准确度。\cite{wang2013joint}为在线社交网络中的视频推荐(video recommendation)设计了一个组合式的社交内容推荐框架. 他们的方法通过利用社交网络信息(social network information)与内容信息(content information), 提出一个user-conetnt matrix填充冷启动中的user-video条目。\cite{tiemann2007towards}研究利用了集成学习(ensemble learning)方法，在音乐推荐中将基于物品协同过滤结果与基于内容方法的结果进行融合。
+
+
+
+
+\subsection{推荐系统评价指标}
+所谓评价指标主要包括“技术评价指标”和“业务评价指标”。技术评价指标包括诸如 RMSE\footnote{RMSE: \textbf{R}oot \textbf{M}ean \textbf{S}quared \textbf{E}rror, 均方根误差}、MAE\footnote{MAE: \textbf{M}ean \textbf{A}bsolute \textbf{E}rror, 平均绝对误差}、
+NDCG\footnote{NDCG: \textbf{N}ormalized \textbf{D}iscounted \textbf{C}umulative \textbf{G}ain}、MAP\footnote{MAP: \textbf{M}ean \textbf{A}verage  \textbf{P}recision, 平均准确率 }、Recall、Precision 等，业务评价指标如成交转化率、用户点击率等。\cite{xiangliang}也介绍了推荐系统中的很多评测指标。这些评测指标可用于评价推荐系统各方面的性能。，它们包括用户满意度、预测准确度、覆盖率、多样性、实时性、健壮性等等。其中有些可以通过计算来定量衡量，有些则只能定性描述，有些可以通过离线实验计算，有些需要通过用户
+调查获得，还有些只能在线评测。这里主要介绍在技术评价指标中, 评分预测与TopN推荐的预测准确度定义。
+
+
+
+
+\subsubsection{评分预测}
+\begin{figure}[htbp]
+	% caption放上面就会显示在图的上方，出现在下面就是出现在图的下方
+	\label{gra1}
+	\begin{center}
+		\includegraphics[width=4in]{rating}
+		\caption{用户评分}
+	\end{center}
+\end{figure}
+很多提供推荐服务的网站都有一个让用户给物品打分的功能。那么，如果
+知道了用户对物品的历史评分，就可以从中习得用户的兴趣模型，并预测该用户在将来看到一个
+他没有评过分的物品时，会给这个物品评多少分。预测用户对物品评分的行为称为评分预测。
+
+评分预测的预测准确度一般通过RMSE和MAE计算。对于
+测试集中的一个用户$u$和物品$i$，令$r_{ui}$是用户$u$对物品$i$的实际评分，而$\hat{r}_{ui}$是推荐算法给出的预测评
+分，那么 RMSE 的定义为：
+\begin{equation*}
+RMSE = \frac
+{\sqrt{{\sum_{\left(u,i\right) \in \mathcal{P}^{te}} \left(r_{ui} - \hat{r}_{ui}\right)^2}}} {|\mathcal{P}^{te}|}
+\end{equation*}
+MAE 采用绝对值计算预测误差，它的定义为：
+\begin{equation*}
+MAE = \frac{{\sum_{\left(u,i\right) \in \mathcal{P}^{te}}} |r_{ui} - \hat{r}_{ui}|}
+	{|\mathcal{P}^{te}|}
+\end{equation*}
+
+关于 RMSE 和 MAE 这两个指标的优缺点， Netflix 认为 RMSE 加大了对预测不准的用户物品评
+分的惩罚(平方项的惩罚)，因而对系统的评测更加苛刻。研究表明，如果评分系统是基于整数
+建立的（即用户给的评分都是整数），那么对预测结果取整会降低 MAE 的误差
+。
+
+
+\subsubsection{TopN推荐}
+\begin{figure}[htbp]
+	
+	\label{gra2}
+	\begin{center}
+		\includegraphics[width=6in]{topn}
+		\caption{TopN推荐}
+	\end{center}
+\end{figure}
+网站在提供推荐服务时，一般是给用户一个个性化的推荐列表，例如购物网站上的热门推荐，这种推荐叫做 TopN 推荐。在现实场景下，TopN推荐也是更常见的一种推荐形式。
+
+TopN 推荐的预测准确率一般通过准确率(precision)/召回率(recall)衡量。
+对于用户$u$, 推荐列表$\mathcal{I}_u^{re}$的准确率定义为：
+\begin{equation*}
+Precision_u = \frac{|\mathcal{I}_u^{re} \cap \mathcal{I}_u^{te}|}{|\mathcal{I}_u^{re}|}
+\end{equation*}
+其召回率定义为:
+\begin{equation*}
+Recall_u = \frac{|\mathcal{I}_u^{re} \cap \mathcal{I}_u^{te}|}{|\mathcal{I}_u^{te}|}
+\end{equation*}
+
+
+
+
+\subsection{本章小结}
+本章首先对推荐系统进行了概括性的介绍，然后主要从典型推荐算法与推荐系统的评价指标两方面对推荐系统的整个框架形成了一个粗略的认识。

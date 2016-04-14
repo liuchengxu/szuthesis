@@ -1,0 +1,120 @@
+\section{适应性采样策略}
+在这一章中，我们结合了内容信息与隐式反馈提出了一个非均匀的物品采样器(a non-uniform item sampler)。在本章中所提出的适应性采样策略(adaptive sampling strategy)自动地模拟了真实的数据分布并且具有适应性地挑选更有针对性的train pairs.
+
+
+\subsection{适应性采样策略概览}
+在现实世界的场景中，用户常常会浏览同一个目录下的多个物品，然后做出他们的选择。那么很显然，我们应该采样具有针对性的物品，比方说针对iPhone，相对于毛巾或者某低档品牌的手机, 采样高档Samsung或者LG显然更具有可比性与合理性。
+
+因此，在适应性采样策略中,我们倾向于采样那些对于用户已选择过的物品更具有可比性同时有很大机会被相关用户浏览的物品。更确切的说，对于一个user-item pair$\left(u_m,v_i\right)$,我们通过以下的步骤采样一个更加合理的负样本(negative item)$v_j$:
+\begin{enumerate}
+	\item 根据用户$u_m$与物品$v_i$的所在目录分布(categorical distribution)，首先推断对于事件用户$u_m$选择物品$v_i$会发生在哪个目录下。
+	\item 
+	对于给定的一个目录，在该目录下我们进一步选择物品$v_j$作为negative item，而该物品同时又具有较高的概率能够被用户$u_m$所浏览。
+\end{enumerate}
+
+
+
+
+\subsection{类别分布}
+在适应性采样中, 首先需要知道用户与物品的类别分布(categorical distribution). 不过在有些实际的应用场景中，由于缺乏类别信息，推荐系统并无法直接得到用户与物品的类别分布。为了应对这个问题，我们利用了所谓的隐式表达(the latent representation of an entity)来近似指示其类别信息。
+
+首先我们假设一个entity可能属于多个目录 $C = \{c_1,c_2,\cdots,c_k\}$ ,并且它的类别分布服从幂率(power laws)分布\cite{rendle2014improving}. 用$y_i^e \in \mathbb{R}^k$ 表示 entity $e_i$ 的latent vector ,而矩阵 $Y_e = \left[y_1^e,y_2^e,y_3^e,\cdots\right]$ 是从内容信息(content information)与隐式反馈(implicit feedback)学习得到的entities's latent representation. 以推荐系统中的一个经典场景为例：在推荐系统有两种类型的实体(entity)，也就是说用户users, 比如消费者, 和物品items, 比如说电影，书籍和歌曲等。明确起见，本论文使用上标$u$与$v$分别表示与用户user和物品item相关的变量。比如，$y^u_m$表示the latent vector of user $u_m$,$Y^u$表示the latent representation matrix of user, $y_i^v$表示the latent vector of item $v_i$.为了联系categorical distribution 与 the latent vector of entity, 我们认为 entity $e_i$属于目录$c\in C$的概率$p\left(c|e_i\right)$为标准化因子的混合(a mixture over standardized factors)，并将其定义为：
+
+\begin{equation}
+p\left(c|e_i\right)  \propto exp\left( \frac {y_{i,c}^e - \mu_c}{\sigma_c} \right)
+\end{equation}
+
+这里的$\mu_c = E\left(y_{*,c}^e\right)$,$\sigma_c = Var\left(y_{*,c}^e\right)$分别表示all entity factors的经验均值与方差(the empirical mean and variance over all entity factors)。假设在用户与物品上的类别分布是相互独立的，那么就可以进一步推断user-item pair$\left(u_m,v_i\right)$同属于一个category $c$的联合概率(joint probability)$p\left(c|u_m,v_i\right)$：
+
+\begin{equation}
+\label{eq21}
+p\left(c|u_m,v_i\right) = p\left(c|u_m\right)p\left(c|v_i\right)
+\end{equation}
+
+根据其联合概率，就可以根据时间用户$u_m$选择物品$v_i$采样一个目录$c$。
+
+
+
+
+\subsection{Rank-Invariant of Item List}
+对于给定一个目录$c$，下一步的目标便是在该目录下选取一个negative item $v_j$，而$v_j$同时将有很大概率会被用户$u_m$所浏览。简单地做法，我们可以将$p\left(c|e_i\right)$作为entity $e_i$在目录$c$下的排序得分(ranking score)，再进一步从根据它们的排序得分直接选择物品。但实际上对于浏览概率(browsing probabilities)与排序得分(ranking scores)并不等同，显然两者之间存在差距。在实际场景中，对于出现在排序列表(ranking lists)中的物品，那些排在靠前位置的物品相对于靠后位置的物品, 往往有着极大的概率被用户所浏览。比如在整个列表中排名前三位的物品的极有可能都会被用户所浏览，而他们排序得分不同的影响在这种情况下将微乎其微。为了应对这个问题，对于给定目录下的物品采样我们分为两步进行：首先，我们先根据经验分布(empirical distribution)从候选物品(candidates)中采样一个排序的位置$r$; 然后，在该目录下对物品进行排序，返回在位置$r$处的物品作为我们采样的negative item。
+
+典型地，经验分布大致服从an analytical law, 比如Geometric\cite{wang2009pskip}或Zipf\cite{adamic2002zipf} distribution。在这里，我们应用Geometric distribution到从目录$c$的排序列表中选取物品$v_j$：
+
+\begin{equation}
+\label{eq22}
+p\left(v_j|c\right) \propto exp\left(-r\left(j\right)/\lambda\right),\lambda \in \mathbb{R}^+
+\end{equation}
+
+这里的$r\left(j\right)$表示物品$v_j$的排序位置，$\lambda$是用来调整概率密度(probability density)的超参数(hyper-parameter)。
+
+
+
+
+\subsection{Discussion of Sorting Items}
+在获得negative item的排序位置后，接下来的任务便是如何在这个位置安排对应的物品。\cite{rendle2014improving}中有一个简单的方法：将物品的 latent factors 当作其 ranking scores, 然后根据它们的排序得分(ranking scores)对物品进行排序. 但是由于物品的latent factors在每轮迭代都会被更新，这种方法不得不在每轮迭代每个目录下对物品进行重新排序。这会导致一个很高的计算复杂度，因为每轮迭代需要花费$\mathit{O}\left(kt\log t\right)$的运行时间来进行重新排序，这里的$t$指物品数。为此在\cite{rendle2014improving}中同样提出一个妥协性的做法：每迭代$t \log t$轮再进行重新排序。不过这种妥协会很容易导致局部收敛(local convergence)。此外, 每隔$t\log t$轮进行更新, 实际上在很多未更新的时候的采样相当于从一个随机的物品子集中随机采样, 此时的采样反而会产生副作用。更进一步, 由于items' latent vectors 是被随机初始化, 那么排序列表在首次重排序之前其实是相当于一个随机序列。如果这个随机的排序列表未被及时更新, 那么采样器实际上会衰退为从一个物品子集中随机采样的采样器。因此, 需要一个新的采样方法来平衡效率与性能表现(efficiency and performance)。
+
+\subsection{Sampling Algorithm}
+\begin{figure}[htbp]
+	\begin{center}
+		\includegraphics[width=3.5in]{subspace}
+		\caption{将不同模态(different modalities)的entity映射到一个共享的隐式空间(a shared latent space). 在这里假设协同信息(collaborative information), 比如评分(rating), 和内容信息(content information), 比如文本(text)，分属于不同模态，正如图中的space A, space B.}
+		\label{gra5}
+	\end{center}
+\end{figure}
+
+根据对于子空间的研究\cite{udupa2010improving,rasiwasia2010new},如果我们将一个entity从不同模态的映射到一个共享子空间，那么它在子空间中的表达应当是具有关联性的，比如互补(complementary)或是相似(similar)。如果我们独立地将一个item从content space和collaborative space映射到a shared latent space,那么我们就能够得到一个item在共享隐式空间的两个latent representations.如图\ref{gra3}所示. 为了避免采样器衰退为从一个物品子集中随机采样一个物品, 我们通过物品的协同信息(collaborative filtering)来初始化排序列表(ranking lists)。具体来说, 我们首先通过特征学习(feature learning)的方法从协同信息中学习物品的一个近似的隐式表达(latent representation), 比如, 用于图像的Conventional Neural Networks(CNN), 用于文本的Latent Dirichlet Allocation(LDA)。那么, 我们将latent factors视作为在目录分布下的物品排序得分, 然后在每个目录下对物品进行排序. 最终,　我们就根据这些排序后的结果对物品排序列表进行初始化。
+
+此外, 为了避免局部收敛的问题, 同时平衡效率, 我们只对于那些热门目录下的物品进行重排序。根据公式\eqref{eq21}, 首先对于一个user-item pair选定一个目录, 然后进一步计算在每个目录下出现了多少所观测的user-item pairs.定义变量$\rho \in \mathbb{R}^k$来表示目录的热度(popularity of categories)。在每次迭代中, 我们根据目录的热度采样出一个热门目录(popular category) $c$:
+\begin{equation}
+p\left(c|p\right) \propto exp\left(\frac{\rho_c - \mu }{\sigma}\right)
+\end{equation}
+这里的$\mu$ 和$\sigma$分别表示$\rho$的经验均值与方差(empirical mean and variance). 然后, 我们将物品的current latent factors视为物品的new ranking scores, 并衡量在目录$c$下的new score vector, 根据a similarity function $sim\left(\cdot,\cdot\right)$与旧的score vector相比是否有较大变化.如果ranking score vector的变化超过了阈值 $\delta$, 就用物品的latent represenration matrix 的第$c$列$y_{*,c}^v$来更新在目录$c$下的ranking scores, 并且对该目录下的物品进行重新排序.
+
+总言之,在本论文中所研究的适应性采样策略如算法$\ref{al2}$所示, 对于一个user-item pair$\left(u_m,v_i\right)$, 采样一个negative item $v_j$, 而$v_j$与$v_i$相比, 不仅具有可比性，而且具有较高的几率为用户所浏览。在算法$\ref{al2}$中, $index\left(c,r\right)$返回在排序列表$l_c \in L$中位置在$r$处的物品。$x_c \in X$是在目录$c$下的ranking score vector, 而$x_c$正是由从协同信息学习而来approximate latent representation所初始化。值得注意的是, 在整个学习过程中,本论文的适应性采样策略仅需要在一些热门目录重排序几次, 这不仅降低了计算复杂度同时避免了局部极值(local extremum)。
+
+\IncMargin{1em}
+\begin{algorithm}
+	\SetAlgoNoLine %不要算法中的竖线
+	
+	\SetKwInOut{Input}{\textbf{输入}}\SetKwInOut{Output}{\textbf{输出}}
+	
+	\Input{
+		\\
+		The observed user-item pair set $\mathcal{P}$\;\\
+		The counters of category popularity $\rho$\;\\
+		The latent representation matrixes $Y^u$ and $Y^v$\;\\
+		The ranking scores of items $X = \{x_1,x_2,\cdots,x_k\}$\;\\
+		The orders of items $L = \{l_1,l_2,\cdot,l_k\}$\;\\}
+	\Output{
+		\\
+		The training triple $\left(u_m,v_i,v_j\right)$\;\\
+		The category popularity $\rho$\;\\
+		Draw a category from $p\left(c|\rho\right)$\;\\}
+	\BlankLine
+	 Draw a popular category $c$ from $p\left(c|\rho\right)$\;
+	 \If {$sim \left(x_c,y_{*,c}^v\right) > \delta $}{
+		 Update $x_c$ by $y_{*,c}^v$\;
+		 Reorder items under $c$ and update $l_c$\;
+	 }
+	 Draw $\left(u_m,v_i\right) \in \mathcal{P}$ uniformly\;
+	 Draw a category $c$ from $p\left(c|u_m,v_i\right)$,$\left(1\leq c \leq k\right)$\;
+	 $\rho_c ++$\;
+	 Draw a rank $r$ from $p\left(r\right) \propto exp\left(-r/\lambda\right),\left(1\leq c \leq k\right)$\;
+	 　
+	 $v_j \leftarrow 
+	 \begin{cases}
+	 index\left(c,r\right) & if \ sgn\left(y_{m,c}^u\right) = 1\\
+	 index\left(c,n-r-1\right) & else
+	 \end{cases}$\;
+	 
+	\caption{Content-aware and Adaptive sampling}
+	\label{al2}
+\end{algorithm}
+\DecMargin{1em}
+
+
+
+
+\subsection{本章小结}
+本章主要介绍了适应性采样策略, 该采样策略通过采样一个具有可比性同时又有较大概率被用户浏览的物品作为negative item。该采样策略不仅能够降低计算复杂度同时能够避免局部极值。
