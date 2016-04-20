@@ -1,9 +1,9 @@
-\section{Content-aware and Adaptive BPR}
-在上述章节中, 我们阐述了如何通过一个适应性采样策略加快BPR的学习, 同时通过仅考虑隐式反馈学习了the latent factors of entities。 不过, 在现实世界的推荐系统中, 并不能够有足够的协同信息, 比如, 新的物品可能会在任何时间被加入到推荐系统中。因此, 我们提出一个更为全面的个性化推荐方法：Content-aware and Adaptive Bayesian Personalized ranking, 它基于上面所提出的适应性采样策略, 同时将隐式反馈与内容信息融合入一个统一的推荐框架中.
+\section{融合内容信息的适应性BPR}
+在上述章节中, 我们阐述了如何通过一个适应性采样策略加快BPR的学习, 同时通过仅考虑隐式反馈学习了the latent factors of entities。 不过, 在现实世界的推荐系统中, 很可能没有足够的协同信息, 比如, 新的物品可能会在任何时间被加入到推荐系统中。因此, 我们提出一个更为全面的个性化推荐方法：Content-aware and Adaptive Bayesian Personalized Ranking, 它基于上面所提出的适应性采样策略, 同时将隐式反馈与内容信息融合入一个统一的推荐框架中.
 
 
 \subsection{Learning Content-aware Mappings}
-我们首先正提出一个对于学习content-aware mappings的一个非监督解决方案。用矩阵$A^e = \left[a_1^e,a_2^e,a_3^e,\dots\right]$来表示content features of entities.然后我们提出对于学习content-aware mappings的目标函数(objective function):
+我们首先正提出一个对于学习content-aware mappings的一个非监督解决方案。用矩阵$A^e = \left[a_1^e,a_2^e,a_3^e,\dots\right]$来表示content features of entities.然后我们提出对于学习content-aware mappings的目标函数:
 \begin{equation}
 L_{content} = \| A^eW^e - Y^e\|_F^2
 \end{equation}
@@ -13,37 +13,37 @@ L_{content} = \| A^eW^e - Y^e\|_F^2
 
 
 \subsection{Parameter Inference of CA-BPR}
-通常来讲, 由于缺乏监督信息(supervised information),在公式所表述的优化问题并无确定解法。不过, 根据子空间的研究, 我们可以从隐式反馈中学习一个latent matrix$\widetilde{Y^e}$, 并用$\widetilde{Y^e}$近似代替$Y^e$. 因此, 将$\widetilde{Y^e}$代替$Y^e$代入公式, 那么目标函数变为: 
+通常来讲, 由于缺乏监督信息(supervised information),在公式所表述的优化问题并无确定解法。不过, 根据子空间的研究, 我们可以从隐式反馈中学习一个latent matrix $\widetilde{Y^e}$, 并用$\widetilde{Y^e}$近似代替$Y^e$. 因此, 将$\widetilde{Y^e}$代替$Y^e$代入公式, 那么目标函数变为: 
 \begin{equation}
 L_{content} = \| A^eW^e - \widetilde{Y^e}\|_F^2
 \end{equation}
 
-使用$\widetilde{Y^e}$近似代替$Y^e$不仅能够优化目标函数, 同时能够一起学习协同信息与内容信息mapping matrix $W^{\left(e\right)}$.因此, 总体的目标函数如下:
+使用$\widetilde{Y^e}$近似代替$Y^e$不仅能够优化目标函数, 同时还能够一起学习包含协同信息与内容信息的 $W^{e}$. 因此, 算法总体的目标函数如下:
 \begin{equation}
 %分隔一个过长的公式分行显示使用split环境
 \begin{split}
 arg \min_{\substack{\Theta, W}} L_{feedback}+L_{content}  = 
-& - \sum_{\left(m,i,j\right) \in D_s} \ln \phi\left(\left(y_i^v - y_j^v\right)y_m^u\right) + \lambda\|\theta\|^2\\
-& + \frac 12 \sum_{e\in \{u,v\}}\lambda^e\|W^e\|^2_F + \|A^eW^e-Y^e\|^2_F
+& - \sum_{\left(m,i,j\right) \in D_s} \ln f \left( r_{mij}\right) + \lambda\|\theta\|^2\\
+& + \|A^eW^e-Y^e\|^2_F + \frac 12 \sum_{e\in \{u,v\}}\lambda^e\|W^e\|^2_F 
 \end{split}
 \end{equation}
-为了学习在公式中的参数$Y^u$, $Y^v$, $W^u$, $W^v$, 
-
-在每轮迭代中, 当我们更新the latent factor matrix $Y^e$, 将矩阵$W^e$认为是一个常量(constant), 并将$L_{content}$视作一个正则化矩阵(regularizer)。那么, 对于一个任意latent parameter $\theta$的梯度如下:
+这里的$r_{mij} = r_{mi} -r_{mj}$。
+为了学习在公式中的参数$Y^u$, $Y^v$, $W^u$, $W^v$, 在每轮迭代中, 当我们更新latent factor matrix $Y^e$, 将矩阵$W^e$认为是一个常量(constant), 并将$L_{content}$视作一个正则化项(regularizer)。那么, 对于一个任意 latent parameter $\theta$ 的梯度如下:
 \begin{equation}
 \begin{split}
 \frac{\partial L}{\partial\theta} = 
-& \sum_{\left(m,i,j\right) \in D_s}\left(1-\Phi\left(\left(y_i^v-y_j^v\right)y_m^u\right)\right) 
-\frac{\partial \left(\left(y_i^v-y_j^v\right)y_m^u\right)}{\partial \theta}\\
-& + \frac{\partial \sum_{e \in \{u,v\} } \lambda^e \left(\|A^eW^e-Y^e\|_F^2\right)}{\partial \theta}
+& \sum_{\left(m,i,j\right) \in D_s}\left(f\left(r_{mij}\right) - 1\right) 
+\frac{\partial \left(r_{mij}\right)}{\partial \theta}\\
+& + \frac{\partial \sum_{e \in \{u,v\} } \lambda^e \left(\|A^eW^e-Y^e\|_F^2\right)}{\partial \theta}   + \lambda \theta 
 \end{split}
 \end{equation}
-对于参数$\theta$的更新公式为: $\theta = \theta + \eta \frac{\partial L}{\partial \theta}$, 这里的$\eta$为学习率(learning rate)。另一方面, 对于一个latent factor matrix $Y^e$, 将$Y^e$视为伪标签(pseudo labels), 并视其为常量。因此对目标求偏导:
+对于参数$\theta$的更新公式为: $\theta = \theta - \gamma \frac{\partial L}{\partial \theta}$, 这里的$\gamma$为学习率(learning rate)。另一方面, 对于一个latent factor matrix $Y^e$, 将$Y^e$视为伪标签(pseudo labels), 并视$L_{feedback}$为常量。因此对目标求偏导:
 \begin{equation}
 \frac{\partial L}{\partial W^e} = \left(A^e\right)^T\left(A^eW^e-Y^e\right) + \lambda^e W^e
 \end{equation} 
-令$\frac{\partial L}{\partial W^e} = 0$, 那么对于$W^{\left(e\right)}$的更新公式则演变为:
+令$\frac{\partial L}{\partial W^e} = 0$, 那么对于$W^e$的更新公式则演变为:
 \begin{equation}
+\label{equ:W}
 W^e = \left(\left(A^e\right)^TA^e + \lambda^e\mathbb{E}\right)A^eY^e
 \end{equation}
 这里的$\mathbb{E} \in \mathbb{R}^{k\times k}$表示一个单位矩阵。
@@ -72,11 +72,11 @@ W^e = \left(\left(A^e\right)^TA^e + \lambda^e\mathbb{E}\right)A^eY^e
 		{\text{convergence}}
 		{Draw a triple $\left(m,i,j\right)$ with 算法\ref{al2}\;
 			\For {each latent vector $\theta \in \Theta$}{
-				$\theta \leftarrow \theta + \eta\frac{\partial L}{\partial \theta}$
+				$\theta \leftarrow \theta - \eta\frac{\partial L}{\partial \theta}$
 			}
 			
-			\For {each $W^e \in W|$}{
-				Update $W^e$ with the rule defined in Eq.(34)\;
+			\For {each $W^e \in W$}{
+				Update $W^e$ with the rule defined in Eq.\ref{equ:W}\;
 			}	
 		}
 		

@@ -18,12 +18,15 @@
 
 \subsection{评测标准}
 
-\textbf{MAP:} 对于$u$的平均准确率定义为：
+\textbf{MAP:} 先看AP(Average Precision), AP即为平均准确率。对于AP可以用这种方式理解: 假使当我们使用google搜索某个关键词，返回了10个结果。当然最好的情况是这10个结果都是我们想要的相关信息。但是假如只有部分是相关的，比如5个，那么这5个结果如果被显示的比较靠前也是一个相对不错的结果。但是如果这个5个相关信息从第6个返回结果才开始出现，那么这种情况便是比较差的。这便是AP所反映的指标，与recall的概念有些类似，不过是“顺序敏感的recall”。
+
+对于$u$的平均准确率定义为：
 \begin{equation*}
-AP_u = \frac{1}{|\mathcal{I}_u^{te}|}\sum_{i \in \mathcal{I}_u^{te}}\left[\frac{1}{p_{ui}}\left(\sum_{j \in \mathcal{I}_u^{te}}\delta \left(p_{uj} \prec p_{ui}\right) + 1\right)\right]
+AP_u = \frac{1}{|\mathcal{I}_u^{te}|}\sum_{i \in \mathcal{I}_u^{te}}\frac{\sum_{j \in \mathcal{I}_u^{te}}\delta \left(p_{uj} \prec p_{ui}\right) + 1}{p_{ui}}
 \end{equation*}
 在这里$p_{ui}$表示推荐列表中物品$i$的排序位置。$p_{uj} \prec p_{ui}$表示在对用户$u$的排序列表中物品$j$的排序位置在物品$i$的前面。
-那么则有：
+
+对于MAP(Mean Average Precision)就很容易知道即为所有用户的AP的均值而已。那么则有：
 \begin{equation*}
 MAP = \frac{\sum_{u \in \mathcal{U}^{te}}AP_u}{|\mathcal{U}^{te}|}
 \end{equation*}
@@ -55,20 +58,22 @@ NDCG_u@k = \frac{DCG_u@k}{IDCG_u}
 NDCG@k = \frac{\sum_{u\in \mathcal{U}^{te}}NDCG_u@k}{|\mathcal{U}^{te}|}
 \end{equation*}
 
+在具体操作中， 可以事先确定推荐目标和推荐结果的相关系分级， 例如可以使用 0，1分别表示相关或不相关，比如此处我们用$ref_i = \delta \left( i \in \mathcal{I}_u^{te}\right)$ , 在这里如果$x$为true, 则$\delta\left(x\right) = 1$，否则$\delta \left(x\right) = 0$. 或是这是0~5分别表示严重不相关到非常相关, 也即相当于确定了$rel$值的范围。之后对于每一个推荐目标的返回结果给定$rel$值，然后使用DCG的计算公式计计算出返回结果的DCG值。使用根据排序后的$rel$值序列计算IDCG值， 即可计算NDCG.
+
 \subsection{实验过程与分析}
-我们对BPR-MF与CA-BPR分别就MAP与NDCG评测指标进行了比较。BPR-MF\cite{rendle2009bpr}应用了矩阵分解的BPR算法框架，同时采用均匀采样策略选取训练采样。表\ref{tab:characteristic}显示了试验方法的不同之处。
+我们对BPR-MF与CA-BPR分别就MAP与NDCG评测指标进行了比较。BPR-MF\cite{rendle2009bpr}应用了矩阵分解的BPR算法框架，同时采用均匀采样策略选取训练采样。CA-BPR\cite{DBLP:conf/webi/GuoWWT15}在利用了隐式反馈数据的基础上同时融入了内容信息，并采取非均匀的适应性采样策略。
+
+表\ref{tab:characteristic}显示了实验方法的不同之处。
 \begin{table}[htbp]
 	\caption{BPR-MF与CA-BPR方法特征比较}
 	\renewcommand\arraystretch{1.3}%改变行高
 	\label{tab:characteristic}
 	\begin{center}
 		\begin{tabular}{|c|c|c|}
-			
 			\hline
-			Method   &   Content & Sampling \\
+			Method   &   Content & Sampling   \\
 			\hline
-			\renewcommand\arraystretch{1}%改变行高
-			BPR-MF   &   no      & uniform  \\
+			BPR-MF   &   no      & uniform    \\
 			CA-BPR   &   yes     & non-uniform\\
 			\hline
 			
@@ -94,9 +99,15 @@ NDCG@k = \frac{\sum_{u\in \mathcal{U}^{te}}NDCG_u@k}{|\mathcal{U}^{te}|}
 			\hline
 		\end{tabular}
 		
+	\end{center}
+\end{table}
+\begin{table}[htbp]
+		\vspace{-1em}
+		\begin{center}
+			
 		\begin{tabular}{|c | c |c |c|c|c|}
 			\hline
-			CA-BPR  &     k=10&   k=20 &    k=30&  k=40 &   k=50\\
+			CA-BPR  &     k=10&   k=20 &    k=30&  k=40 &   k=50  \\
 			\hline
 			MAP     &   0.1074&  0.1072&  0.1274&  0.1016&  0.1229\\
 			\hline
@@ -109,7 +120,7 @@ NDCG@k = \frac{\sum_{u\in \mathcal{U}^{te}}NDCG_u@k}{|\mathcal{U}^{te}|}
 	\end{center}
 \end{table}
 
-图\ref{fig:map}显示了BPR-MF与CA-BPR在不同维度下的MAP结果对比。
+图\ref{fig:map}显示了BPR-MF与CA-BPR在不同维度下的MAP结果对比。显然，融合了内容信息同时采用适应性采样策略的CA-BPR推荐效果比BPR-MF要好，由此说明内容信息及适应性采样策略的确是有效的。
 \begin{figure}[htbp]
 	\begin{center}
 	\includegraphics[width=4in]{mapbar}

@@ -1,6 +1,6 @@
 \section{预备知识}
 
-\subsection{Bayesian Personalized Ranking (BPR)}
+\subsection{Bayesian Personalized Ranking}
 \begin{figure}[htbp]
 	% caption放上面就会显示在图的上方，出现在下面就是出现在图的下方
 	% label的位置也有讲究
@@ -21,7 +21,7 @@ p \left( i \succ_u j \right) := f \left( x_{uij} \right),
 这里$f \left(x\right) = 1/\left(1+exp\left(-x\right)\right)$\footnote{$f \left(x\right)$即为sigmoid函数}, $x_{uij} := s\left(u,i\right) - s\left(u,j\right)$, $s\left(\cdot,\cdot\right)$可以是任何表示用户与物品相关程度的函数。在BPR\cite{rendle2009bpr}中, $s\left(\cdot,\cdot\right)$为用户对物品的预测值, 即$s\left(u,i\right) = \hat{r}_{ui}$, $x_{uij} = \hat{r}_{ui}-\hat{r}_{uj}$.
 
 
-\subsubsection{预测公式(Prediction Rule)}
+\subsubsection{预测公式}
 
 在BPR中, 用户$u$对于物品$i$的预测值$\hat{r}_{ui}$公式为:
 \begin{equation}
@@ -201,7 +201,7 @@ b_{j\cdot} &= b_j - \gamma\bigtriangledown b_{j}
 
 除此以外，与经典的分解技术相似，如果一个用户或物品缺乏足够的反馈，其对应的隐式表达往往不能够被很好的学习到。在现实世界数据集中，用户行为与物品流行度的分布往往呈现长尾状。这就导致了大部分的用户和物品仅仅有很小部分的反馈数据。此外，在真实的推荐系统中，新的个体可能在任何时间被加入到推荐系统中。因此，BPR框架也很容易受制于冷启动问题。
 
-\subsection{Latent Dirichlet allocation}
+\subsection{Latent Dirichlet Allocation}
 Latent Dirichlet allocation(LDA)，隐含狄利克雷分布，是一种主题模型(topic model)，它可以将文档集中每篇文档的主题按照概率分布的形式给出。同时它是一种无监督学习算法，在训练时不需要手工标注的训练集，需要的仅仅是文档集以及指定主题的数量即可。此外LDA的另一个优点则是，对于每一个主题均可找出一些词语来描述它。
 
 LDA首先由于2003年提出\cite{blei2003latent}，目前在文本挖掘领域包括文本主题识别、文本分类以及文本相似度计算方面都有应用。
