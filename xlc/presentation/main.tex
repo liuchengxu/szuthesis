@@ -1,0 +1,77 @@
+\documentclass[11pt,
+xcolor={svgnames},
+hyperref={colorlinks,citecolor=green,linkcolor=DeepPink,anchorcolor=blue}
+]{beamer}
+\usetheme{Frankfurt}
+%\usefonttheme{serif}
+\usefonttheme[stillsansseriflarge,stillsansserifsmall]{serif}
+%\usecolortheme{seahorse}
+%\usecolortheme{rose}
+%\setbeamerfont{title}{shape=\itshape,family=\rmfamily}
+%\setbeamercolor{title}{fg=red!80!black,bg=red!20!white}
+
+%\usepackage[super,square]{natbib}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[linesnumbered,boxed,ruled,commentsnumbered]{algorithm2e}%%算法
+\usepackage{listings}%%%%显示代码
+\lstset{
+	numbers=left,
+	numberstyle=\tiny,
+	keywordstyle=\color{blue!70},
+	commentstyle=\color{red!50!green!50!blue!50},
+	frame=single, 
+	rulesepcolor=\color{red!20!green!20!blue!20},
+	escapeinside=``
+}
+\usepackage{makecell}%改变表格横线样式， Xhline;Xcline
+
+
+\DeclareGraphicsExtensions{.eps,.ps,.png,.jpg}%对于同名图片的优先顺序调用
+\graphicspath{{graphics/}}%设置图片路径为当前路径下的graphics文件夹
+
+\author{Liucheng Xu\\
+	\smaller{2012080173}}
+\title{Research on Content-Aware Collaborative Filtering}
+
+\subtitle{Content-Aware Bayesian Personalized Ranking}
+
+\logo{szulogo}
+
+\institute{College of Computer Science and Software Engineering \\ Shenzhen University}
+
+\date{\today}
+
+\subject{Recommendation System}
+
+\setbeamercovered{transparent}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]{}
+
+\begin{document}
+	\maketitle
+	
+	\section*{Outline}
+	\begin{frame}
+		\tableofcontents[pausesections]
+	\end{frame}
+	
+	
+	\include{data/notations}
+	\include{data/chapter01}
+	\include{data/chapter02}
+	\include{data/chapter03}
+	\include{data/chapter04}
+	
+	
+	
+	\bibliographystyle{apalike}
+	\bibliography{ref/presentation}
+		
+\end{document}

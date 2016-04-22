@@ -1,0 +1,93 @@
+\section{Content-Aware and Adaptive BPR}
+
+\subsection*{Learning content-aware mappings}
+\begin{frame}{Learning content-aware mappings}
+	\begin{itemize}
+		\item  We present the objective function to learn the
+		content-aware mappings:
+		\begin{equation}
+		L_{content} = \| A^eW^e - Y^e\|_F^2
+		\end{equation}
+		where the matrix $A^e = \left[a_1^e,a_2^e,a_3^e,\dots\right]$ denotes the content features of entities, $W^e \in \mathbb{R}^{d^e \times k}$ denotes a mapping matrix, and $k$ is the
+		dimension of latent vectors.
+	\end{itemize}
+\end{frame}
+
+
+
+\subsection*{...}
+\begin{frame}{Parameter inference of CA-BPR}
+	\begin{itemize}
+		\item The overall objective function of CA-BPR with latent vectors and content-aware mappings is expressed as:
+		\scalebox{0.8}{
+			\parbox{1.2\textwidth}{
+				\begin{equation}
+				%分隔一个过长的公式分行显示使用split环境
+				\begin{split}
+				arg \min_{\substack{\Theta, W}} L_{feedback}+L_{content}  = 
+				& - \sum_{\left(m,i,j\right) \in D_s} \ln f \left( r_{mij}\right) + \lambda\|\theta\|^2\\
+				& + \|A^eW^e-Y^e\|^2_F + \frac 12 \sum_{e\in \{u,v\}}\lambda^e\|W^e\|^2_F 
+				\end{split}
+				\end{equation}
+			}
+		}
+		
+	\end{itemize}
+\end{frame} % to enforce entries in the table of contents
+
+\begin{frame}
+	\begin{itemize}
+		\item Given a latent factor matrix $Y^e$ , we view $Y^e$ as pseudo labels and treat $L_{feedback}$ as a constant. Thus, the derivative of objective is
+		\begin{equation}
+		\frac{\partial L}{\partial W^e} = \left(A^e\right)^T\left(A^eW^e-Y^e\right) + \lambda^e W^e
+		\end{equation} 
+		Let $\frac{\partial L}{\partial W^e} = 0$, the updating rule for $W^e$ can be derived as:
+		\begin{equation}
+		\label{equ:W}
+		W^e = \left(\left(A^e\right)^TA^e + \lambda^e\mathbb{E}\right)A^eY^e
+		\end{equation}
+		where $\mathbb{E} \in \mathbb{R}^{k\times k}$ is an identity matrix.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	
+	\scalebox{0.8}{
+		\parbox{1.2\textwidth}{
+			\IncMargin{1em}
+			\begin{algorithm}[H]
+				\SetAlgoNoLine %不要算法中的竖线
+				\SetKwInOut{Input}{input}\SetKwInOut{Output}{output} %%%%查看宏包说明
+				\Input{
+					\\
+					The observed user-item pair set $S$\;\\
+					The feature matrix of items $F$\;\\
+					The content features entities $A := \{A^u,A^v\}$\; \\}
+				\Output{
+					\\
+					$\Theta \  := \{Y^u,Y^v\}$\;\\
+					$W := \{W^u,W^v\}$\; \\ }
+				\BlankLine
+				initialize the model parameter $\Theta$ and $W$ with uniform $\left(-\sqrt{6}/{k},\sqrt{6}/{k}\right)$\;
+				standarized $\Theta$\;
+				Initialize the popularity of categories $\rho$ randomly\;
+				\Repeat
+				{\text{convergence}}
+				{Draw a triple $\left(m,i,j\right)$ with Algorithm \ref{algo:sampling}\;
+					\For {each latent vector $\theta \in \Theta$}{
+						$\theta \leftarrow \theta - \eta\frac{\partial L}{\partial \theta}$
+					}
+					\For {each $W^e \in W$}{
+						Update $W^e$ with the rule defined in Eq.\ref{equ:W}\;
+					}	
+				}
+				\caption{Learning paramters for BPR\label{al3}}
+			\end{algorithm}
+			\DecMargin{1em}
+		}
+	}
+	
+\end{frame}
+
+
+

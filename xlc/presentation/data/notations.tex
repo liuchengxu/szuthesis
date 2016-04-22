@@ -1,0 +1,32 @@
+\section*{Notations}
+\begin{frame}
+	\begin{table}[H]%[htbp]表格参数设置，固定位置
+		\setlength\tabcolsep{2pt}
+		\renewcommand\arraystretch{1.1}%改变行高
+		\caption{Some notations}
+		\label{tab1}
+		\begin{center}
+			
+			\begin{tabular}{c|c}
+				
+				\Xhline{1.2pt}
+				$s$                       &user number\\
+				$t$                       &item number\\
+				$k$                       &latent dimension (category number)\\
+                $U,Y^u \in \mathbb{R}^{s\times k}$        &user latent matrix\\
+				$V,Y^v \in \mathbb{R}^{t\times k} $       &item latent matrix \\
+				$X \in \mathbb{R}^{t\times k}$            &ranking scores under categories\\
+				$x_c \in X$                     &ranking score vector under category $c$\\
+				$y^v_{*,c} \in Y^v$             & c-th column of $Y^v$\\
+				$L\in \mathbb{R}^{t\times k}$   &ranking lists under categories\\
+				$\rho \in \mathbb{R}^k$         & counters of category popularity\\
+				$e \in \{u,v\}$                 & entity\\
+				$A^e$                           &content feature of entities\\
+				$W^e$                           &mapping matrix\\
+				$Y^e$                           &entity latent matrix\\
+				\Xhline{1.2pt}
+				
+			\end{tabular}
+		\end{center}
+	\end{table}
+\end{frame}

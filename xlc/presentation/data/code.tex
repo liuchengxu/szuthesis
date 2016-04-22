@@ -1,0 +1,69 @@
+\begin{frame}[fragile]
+	\frametitle{An Algorithm For Finding Prime Numbers.}
+	%使用空格进行缩进
+	\begin{lstlisting}[language=python,xleftmargin=-4em,xrightmargin=2em, aboveskip=1em,framexleftmargin = -4em,framexrightmargin = 4em]
+	def getRankingDistribution(self, lambda_setting):
+	
+	    p = []
+	    p.append(npy.exp(-1.0 / lambda_setting))
+	    
+	    for k in range(1, self.node_num):
+	        temp = -1.0 * (k + 1) / lambda_setting
+	        p.append(npy.exp(temp) + p[k - 1])
+	        
+	    return p;
+	\end{lstlisting}
+	
+\end{frame}
+
+\begin{frame}[fragile]
+	
+	\begin{lstlisting}[language=python,xleftmargin=-4em,xrightmargin=2em, aboveskip=1em,framexleftmargin = -4em,framexrightmargin = 4em]
+	def getCate(self, u_vec, v_vec):
+	    p = []
+	    p.append(u_vec[0] * v_vec[0])
+	    
+	    for k in range(1, self.Z):
+	        p.append(p[k - 1] + u_vec[k] * v_vec[k])
+	    
+	    q = npy.random.uniform() * p[self.Z - 1]
+	    for f in range(self.Z):
+	        if(p[f] > q):
+	            break
+	            
+	    return f;
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+%	\scalebox{0.8}{
+%		\parbox{1.2\textwidth}{
+			\begin{lstlisting}[language=python,xleftmargin=-15em,xrightmargin=2em, aboveskip=0.2em,framexleftmargin = -14em,framexrightmargin = 4em]
+			def draw_CA_BPR(self, uL, vL,
+			           u_cat_vars, v_cat_vars, item_sorts):
+			    res = []
+			    for u in self.graph:
+			        for v in self.graph[u]:
+			        cate = self.getCate(uNorm[self.user_set[u]], 
+			                    vNorm[self.item_set[v]])
+			        self.cate_count[cate] += 1
+			        while 1 :
+			            r = self.getPos(self.vSum)
+			            if(uL[self.user_set[u], cate] < 0):
+			                r = self.vSum - r - 1
+			            vj = self.node_set[item_sorts[cate][r]] 
+			            if(self.graph[u].has_key(vj) == False):
+			                break
+			         res.append((u, v, vj))
+			    random.shuffle(res)
+			    return res;
+			\end{lstlisting}
+	%	}
+	%}
+	
+\end{frame}
+
+%\end{frame} can NOT be indented
+%\end{frame} cannot have any comments directly after it
+%\end{frame}不能缩进
