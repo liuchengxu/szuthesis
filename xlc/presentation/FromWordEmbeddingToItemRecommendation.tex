@@ -16,6 +16,10 @@ anchorcolor=blue,
 citecolor=green
 ]{hyperref}
 
+%%%%[dvips]有时候加入这个选项反而会使图片出现空白
+\usepackage{graphicx}%图片包
+\DeclareGraphicsExtensions{.eps,.ps,.png,.jpg}%对于同名图片的优先顺序调用
+\graphicspath{{graphics/}}%设置图片路径为当前路径下的graphics文件夹
 
 \begin{document}
 	\maketitle
@@ -53,6 +57,12 @@ citecolor=green
 	Word2Vec的技术通常被认为是deep learning技术。比如\cite{salakhutdinov2007restricted,georgiev2013non,wang2015collaborative}几乎没有其他深度学习的方法能够被用来推荐系统中.在\cite{salakhutdinov2007restricted}使用 Restricted Boltzmann Machines(RBM's)来推荐电影。它对物品评分间的相互关系进行建模。\cite{georgiev2013non}通过对用户与用户之间和物品与物品之间的相互关系进行建模扩展了\cite{salakhutdinov2007restricted}。\cite{wang2015collaborative}提出了hierarchical Bayesian模型，该模型通过物品的内容信息与用户过去的偏好信息来进行学习。
 	
 	在本篇工作中，我利用了Word2Vec的skip-gram技术来为目标用户推荐check-in地点。与之前的一些在推荐中利用Word2Vec\cite{shin2014recommending,musto1441word}不同, 我利用了非文本的特征叫做用户的过往check-ins。
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{1}
+		\end{center}
+		\caption{Word2Vec techniques}
+	\end{figure}
 	
 	
 	\section{Recommendation using multiple data sources}
@@ -99,6 +109,12 @@ citecolor=green
 	收敛性衡量了为用户提供的任何推荐的比率，而其与是否相关无关。在推荐系统中，一些方法可能会为了提高准确度而失去收敛性\cite{bellogin2013empirical,herlocker2004evaluating}，这表明收敛性与准确度应该被同时分析。
 	
 	在本篇报告所提出的方法使用了两个参数：近邻数$N$与推荐列表的大小$k$。\cite{ozsoy2014multi}认为对于CheckinsJan数据集最佳表现值为$N=30$和$k=10$，这些值都在实验中被使用。同时\cite{ozsoy2014multi}也阐明了在所给参数的方法上的上界：对于Precision考量的上界被发现为$0.489$而余下的考量为$1.0$。
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{2}
+		\end{center}
+		\caption{The time needed to model the input data with skip-gram technique}
+	\end{figure}
 	
 	当输入数据通过skip-gram技术进行建模后在评测几组不同的设定值。在训练中使用的参数在时间与质量上影响着推荐表现[26]。这些参数都是基于gensim toolbox的实现。参数设置的细节及调整方式如下：
 	\begin{itemize}
@@ -109,16 +125,50 @@ citecolor=green
 	\end{itemize}
 	
 	对于CheckinsJan数据集的模型训练时间如图2所示。根据图表，当特征数增加时，训练时间大概增加40s至70s。类似地，参数$context\_count$与$epoch\_count$增加时训练时间也会随之增加。总体的结果表明CheckinsJan数据集的模型训练时间少于75s。
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{3}
+		\end{center}
+		\caption{The time needed to make recommendation using the model created by skip-gram}
+	\end{figure}
 	
 	本文提出的共有3种不同的推荐技术使用了skip-gram训练的模型。这些技术为‘recommendation by k-nearest items(KNI)’,'recommendation by N-nearest items(NN)','recommendation by N-nearest users and k-nearest item(KIU)'. 为所有目标用户做出推荐所花费的时间如表3所示。 图表显示KNI相比其他方法花费更少的时间，因为它直接使用了模型的输出而没有进一步的计算，比如寻找近邻。即便是花费最多时间的方法与参数设置其对CheckinsJan数据集的所有目标不超过1900s。而整个数据集有7187个用户，也就是说在推荐过程中每个目标用户花费的时间不到0.26s。
 	
 	在表格4-6中展示了所提出方法的推荐表现。对于所有的方法增大$feature\_count$，即向量表示的大小，都能够提高表现。不过当这个参数值超过50时，即使再继续增长提升的效果将变得越不明显。当$context\_count\left(C\right)=5$时该模型将不能够捕捉到物品与用户间的语义相似性。在设置该参数值$C=10$设置更高时，越高则表现越好。对于$context\_count$与$epoch\_count$，参数值的增加仅会对推荐表现产成微弱影响。
 	
 	根据图表4-6中推荐技术的表现比较，最好的方法是KNI,其次为KIU.这些方法都利用了目标用户对物品的向量表示及其相似度。虽然KNI与KIU都利用了物品向量间的相似度，不过KIU更是额外地利用了目标用户的近邻用户，而这些近邻用户则是由用户向量间的相似度所决定。与KNI相比，在KIU中对于近邻的利用并没有获得很好的推荐表现。这可能表明在CheckinsJan数据集上使用用户向量相似度本身就是没有什么效果。这可能也是在向量空间中用户无法被区分的根源所在，尽管数据集中的用户数并不是很高，仅有8307个用户。
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{4}
+		\end{center}
+		\caption{Performance results of KNI}
+	\end{figure}
+	
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{5}
+		\end{center}
+		\caption{Performance results of NN}
+	\end{figure}
+	
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{6}
+		\end{center}
+		\caption{Performance results of KIU}
+	\end{figure}
 	
 	在表格1中，我将在本篇报告中所提出的方法，即KNI，NN和KIU与已有的一些推荐方法进行了比较。第一个方法便是传统的协同过滤方法，它使用了用户过去的偏好和其相似度。接下来的两种方法来自\cite{ozsoy2014multi}，它们基于多重目标的优化技术并将用户过去的偏好与其他一些特征进行了组合，比如用户的家乡，朋友及其相互关系。使用了过去的check-ins和用户的故乡的方法简称为MO-CH，而使用了上面所有提到的特征的方法简称为MO-CFIH。最后的两种方法来自\cite{gao2012exploring}，它们使用了来自自然语言处理的一个语言模型进行推荐。这个方法能够对过去的偏好与用户的社会关系进行组合。我使用了两个版本的该方法，其中一个仅使用了用户过去的偏好(Gao-H)，另一个使用了过去的偏好与社会关系进行组合(Gao-SH).
 	
-	根据表格1，在本篇报告所提出的方法，KNI,NN和KIU能够对任何用户进行推荐，也就是说$Coverage=1.0$.表现最好的方法是Gao-H和Gao-SH,这也表明在自然语言处理中的一些方法对于推荐的确有效。就Precision与Hitrate而言，除了\cite{gao2012exploring}的方法，KNI比其他方法的表现都要好。就Ndcg而言，通常一个利用了多种特征的方法会比单一特征的方法要更好。
+	
+	根据表格\ref{tab:1}，在本篇报告所提出的方法，KNI,NN和KIU能够对任何用户进行推荐，也就是说$Coverage=1.0$.表现最好的方法是Gao-H和Gao-SH,这也表明在自然语言处理中的一些方法对于推荐的确有效。就Precision与Hitrate而言，除了\cite{gao2012exploring}的方法，KNI比其他方法的表现都要好。就Ndcg而言，通常一个利用了多种特征的方法会比单一特征的方法要更好。
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=4in]{7}
+		\end{center}
+		\caption{Comparison of methods}
+		\label{tab:1}
+	\end{figure}
 	
 	\section{Conclusion}
 	推荐系统基于用户以前的对于物品的一些交互预测他们在未来的偏好。在已有的方法中，有很多用来推荐的技术，比如基于近邻，基于机器学习和基于矩阵分解的方法。其中一个很流行的方法便是基于矩阵分解的方法，它使用低秩矩阵对输入数据进行近似。与此相类似，在自然语言处理中的词嵌入方法也是学习输入元素在低维向量空间的表示。
