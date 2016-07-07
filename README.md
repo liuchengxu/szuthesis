@@ -10,6 +10,6 @@ Shenzhen University undergraduate thesis
 
 在学习LaTeX的过程中，也积累了一些经验，新手或值得一看：
 
-- [从零开始LaTeX快速入门](xuliuchengxlc.github.io/2016/01/30/quick-latex.html)
+- [从零开始LaTeX快速入门](https://xuliuchengxlc.github.io/2016/01/30/quick-latex.html)
 
 - [LaTeX实战经验](http://blog.csdn.net/simple_the_best/article/details/51244631)
