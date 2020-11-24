@@ -1,0 +1,28 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-20.04
+
+    defaults:
+      run:
+        working-directory: src/thesis
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -qq install texlive-full
+          sudo apt-get -qq install fonts-noto-cjk
+          sudo locale-gen zh_CN.UTF-8
+      - name: compile
+        run: |
+          xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
+          bibtex main
+          xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
+          xelatex -synctex=1 -interaction=nonstopmode -file-line-error main.tex
