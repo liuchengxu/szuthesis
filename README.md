@@ -2,6 +2,8 @@
 
 Shenzhen University Undergraduate Thesis
 
+[![](https://github.com/liuchengxu/szuthesis/workflows/CI/badge.svg)](https://github.com/liuchengxu/szuthesis/actions?query=workflow%3ACI)
+
 ## 简介
 
 论文主要关于推荐系统，重点研究在利用隐式反馈的推荐算法上如何融合内容信息, 算法模型为 `Bayesian Personalized Ranking + Content`，可以 [点击这里](https://liuchengxu.github.io/szuthesis/pdf/thesis.pdf) 查看论文. 
